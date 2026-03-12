@@ -118,8 +118,8 @@ Ray RayTracer::ray_thru_pixel(int i, int j) {
      * TODO: Task 3
      * Randomly sample x and y inside pixel(i, j) using `rand_uniform(0.0f, 1.0f)`
      */
-    float x = 0.5f;
-    float y = 0.5f;
+    float x = rand_uniform(0.0f,1.0f);
+    float y = rand_uniform(0.0f,1.0f);
 
     /**
      * TODO: Task 1.1
@@ -127,8 +127,8 @@ Ray RayTracer::ray_thru_pixel(int i, int j) {
      * through current pixel (i, j)
      * For this part look at slide 10 and 46
      */
-    float alpha = 2.0f * (((float)i + 0.5f) / camera.width) - 1.0f;  // TODO: Implement this
-    float beta = 1 - 2.0f * (((float)j + 0.5) / camera.height); // TODO: Implement this
+    float alpha = 2.0f * (((float)i + x) / camera.width) - 1.0f;  // TODO: Implement this
+    float beta = 1.0f - 2.0f * (((float)j + y) / camera.height); // TODO: Implement this
 
     vec3 u(camera.cameraMatrix[0]);
     vec3 v(camera.cameraMatrix[1]);
