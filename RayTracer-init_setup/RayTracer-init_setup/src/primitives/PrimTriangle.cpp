@@ -41,16 +41,16 @@ bool PrimTriangle::intersect(const Ray& ray, Intersection& out_hit) const {
      * out_hit = {t, point, normal, const_cast<PrimTriangle *>(this), nullptr};
      */
     //slide 57
-    mat4 triangle = mat4(vertices[0].x,vertices[0].y,vertices[0].z,1.0f,vertices[1].x,vertices[1].y,vertices[1].z, 1.0f,vertices[2].x,vertices[2].y,vertices[2].z, 1.0f,-1.0f*ray.dir.x ,-1.0f*ray.dir.y ,-1.0f*ray.dir.z, 0.0f);
-    mat4 triangleInverse = inverse(triangle);
+    mat4 pointsAndDir = mat4(vertices[0].x, vertices[0].y, vertices[0].z, 1.0f, vertices[1].x, vertices[1].y, vertices[1].z, 1.0f, vertices[2].x, vertices[2].y, vertices[2].z, 1.0f, -1.0f * ray.dir.x, -1.0f * ray.dir.y, -1.0f * ray.dir.z, 0.0f);
+    mat4 pointsAndDirInverse = inverse(pointsAndDir);
     vec4 p0Vector = vec4(ray.p0.x, ray.p0.y, ray.p0.z, 1.0f);
-    vec4 lambdasAndT = triangleInverse * p0Vector;
-    if (lambdasAndT.x < 0.0f || lambdasAndT.y < 0.0f || lambdasAndT.z < 0.0f || lambdasAndT.w < 0.0f) { //i think kEpsilon is used to account for floating point error
+    vec4 lambdasAndT = pointsAndDirInverse * p0Vector;
+    if (lambdasAndT.x < 0.0f || lambdasAndT.y < 0.0f || lambdasAndT.z < 0.0f || lambdasAndT.w < 1.0f * kEpsilon) {
         return false;
     }
-    vec3 q = ray.p0 + lambdasAndT.w * ray.dir;
-    vec3 normal = normalize(lambdasAndT.x * normals[0] + lambdasAndT.y * normals[1] + lambdasAndT.z * normals[2]);
-    out_hit = { lambdasAndT.w, q, normal, const_cast<PrimTriangle*>(this), nullptr };
+    vec3 q = lambdasAndT.x * vertices[0] + lambdasAndT.y * vertices[1] + lambdasAndT.z * vertices[2];
+    vec3 n = normalize(lambdasAndT.x * normals[0] + lambdasAndT.y * normals[1] + lambdasAndT.z * normals[2]);
+    out_hit = { lambdasAndT.w, q, n, const_cast<PrimTriangle*>(this), nullptr };
 
     return true;  // Return `true` if intersection happened, otherwise return `false`.
 }

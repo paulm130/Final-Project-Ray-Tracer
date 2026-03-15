@@ -31,7 +31,7 @@ bool PrimSphere::intersect(const Ray& ray, Intersection& out_hit) const {
      * - Only accept intersections with t > kEpsilon.
      */
     //slide 62
-    float discriminant = sqrt(pow(dot(ray.dir,ray.p0-center),2.0f)-pow(length(ray.p0-center),2.0f)+pow(radius,2.0f));
+    float discriminant = pow(dot(ray.dir, ray.p0 - center), 2.0f) - pow(length(ray.p0 - center), 2.0f) + pow(radius, 2.0f);
     if (discriminant < 0.0f) {
         return false;
     }

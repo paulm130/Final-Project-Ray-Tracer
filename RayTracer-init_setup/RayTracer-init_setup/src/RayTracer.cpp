@@ -127,16 +127,16 @@ Ray RayTracer::ray_thru_pixel(int i, int j) {
      * through current pixel (i, j)
      * For this part look at slide 10 and 46
      */
-    float alpha = 2.0f * (((float)i + x) / camera.width) - 1.0f;  // TODO: Implement this
-    float beta = 1.0f - 2.0f * (((float)j + y) / camera.height); // TODO: Implement this
+    float alpha = 2.0f * (((float)i + x) / (float)camera.width) - 1.0f;  // TODO: Implement this
+    float beta = 1.0f - 2.0f * (((float)j + y) / (float)camera.height);  // TODO: Implement this
 
     vec3 u(camera.cameraMatrix[0]);
     vec3 v(camera.cameraMatrix[1]);
     vec3 w(camera.cameraMatrix[2]);
 
-    float a = camera.width / camera.height;
+    float a = (float)camera.width / (float)camera.height;
     //i think v and w are x and y for camera
-    ray.dir = vec3(glm::normalize(alpha*a*glm::tan(camera.fovy/2)*u+beta*glm::tan(camera.fovy/2)*v-w));  // TODO: Implement this. look at slide 47
+    ray.dir = vec3(normalize(alpha * a * tan(camera.fovy_radians() / 2.0f) * u + beta * tan(camera.fovy_radians() / 2.0f) * v - w));  // TODO: Implement this. look at slide 47
     ray.debug_color = 0.5f * ray.dir + 0.5f;
 
     return ray;
