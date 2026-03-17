@@ -45,8 +45,7 @@ Ray DiffuseMaterial::sample_ray_and_update_radiance(Ray& ray, Intersection& inte
 
     // The sampled direction above is in local coordinates.
     // Align it with the surface normal before updating the ray.
-    vec3 new_dir = align_with_normal(hemisphere_sample, normal);
-    ray.W_wip *= albedo;
+    vec3 new_dir = align_with_normal(hemisphere_sample, intersection.normal);
 
     // Step 2: Calculate radiance
     /**
@@ -55,10 +54,10 @@ Ray DiffuseMaterial::sample_ray_and_update_radiance(Ray& ray, Intersection& inte
      * Note:
      * - C_diffuse = `this->albedo`
      */
-    vec3 W_diffuse = vec3(hemisphere_sample);  // TODO: throughput multiplier for current bounce
+    vec3 W_diffuse = vec3(this->albedo);  // TODO: throughput multiplier for current bounce
 
     ray.W_wip = ray.W_wip * W_diffuse;
-    ray.p0 = point + kRayEpsilon * normal;
+    ray.p0 = intersection.point + kRayEpsilon * intersection.normal;
     ray.dir = new_dir;
     ray.allow_emissive_hit = false;  // old `is_diffuse_bounce=true` policy mapping
     ray.n_bounces++;
