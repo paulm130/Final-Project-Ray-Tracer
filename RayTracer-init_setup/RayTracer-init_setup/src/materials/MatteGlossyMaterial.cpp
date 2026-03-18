@@ -1,0 +1,160 @@
+#define GLM_ENABLE_EXPERIMENTAL
+#include "MatteGlossyMaterial.h"
+
+#include <cmath>
+#include <glm/glm.hpp>
+#include <iostream>
+#include <limits>
+#include <mutex>
+
+#include "ModelBase.h"
+#include "Scene.h"
+
+using namespace glm;
+
+namespace {
+constexpr float kRayEpsilon = 0.001f;
+constexpr int kDirectLightSamples = 8;
+constexpr float kPi = 3.14159265358979323846f;
+}  // namespace
+
+Ray MatteGlossyMaterial::sample_ray_and_update_radiance(Ray& ray, Intersection& intersection) {
+    /**
+     * Calculate the next ray after intersection with the model.
+     * This will be used for recursive ray tracing.
+     */
+
+    vec3 normal = intersection.normal;
+    vec3 point = intersection.point;
+
+    // Diffuse reflection
+
+    // Step 1: Sample ray direction
+    /**
+     * TODO(Task 6.1):
+     * Implement cosine-weighted hemisphere sampling.
+     */
+    float s = rand01();
+    float t = rand01();
+
+    // TODO: Update u, v based on Equation (8) in handout.
+    float u = 2 * kPi * s;
+    float v = sqrt(1-t);
+
+    vec3 hemisphere_sample = vec3(v*cos(u),sqrt(t),v*sin(u));  // TODO: Create cosine-weighted sampled local direction
+
+    // The sampled direction above is in local coordinates.
+    // Align it with the surface normal before updating the ray.
+    vec3 new_dir = align_with_normal(hemisphere_sample, intersection.normal);
+
+    // Step 2: Calculate radiance
+    /**
+     * TODO(Task 6.1):
+     * Calculate throughput update for diffuse bounce.
+     * Note:
+     * - C_diffuse = `this->albedo`
+     */
+    vec3 W_diffuse = vec3(this->albedo);  // TODO: throughput multiplier for current bounce
+
+    ray.W_wip = ray.W_wip * W_diffuse;
+    ray.p0 = intersection.point + kRayEpsilon * intersection.normal;
+    ray.dir = new_dir;
+    ray.allow_emissive_hit = false;  // old `is_diffuse_bounce=true` policy mapping
+    ray.n_bounces++;
+
+    return ray;
+}
+
+glm::vec3 MatteGlossyMaterial::get_direct_lighting(Intersection const& intersection, Scene const& scene) const {
+    using namespace glm;
+
+    /**
+     * Note:
+     * - Light sources from scene can be accessed by `scene.light_sources`
+     * - Visibility checks should use nearest-hit queries (`scene.intersect_nearest`)
+     */
+
+    // Iterate over all light sources.
+    vec3 cumulative_direct_light = vec3(0.0f);
+    for (unsigned int idx = 0; idx < scene.light_sources.size(); idx++) {
+        ModelBase* light_source = scene.light_sources[idx];
+
+        // Intersection could itself be on one light source, so skip self.
+        if (light_source == intersection.model)
+            continue;
+
+        vec3 summed_samples = vec3(0.0f);
+        for (int sample_idx = 0; sample_idx < kDirectLightSamples; sample_idx++) {
+            // Get sampled light position on emissive geometry.
+            vec3 light_pos = light_source->get_surface_point();
+            vec3 to_light = light_pos - intersection.point;
+            float dist2 = dot(to_light, to_light);
+            if (dist2 <= 0.0f)
+                continue;
+
+            float dist = std::sqrt(dist2);
+            vec3 light_dir = to_light / dist;
+
+            float c_x = std::max(dot(intersection.normal, light_dir), 0.0f);
+            if (c_x <= 0.0f)
+                continue;
+
+            // Shoot a shadow ray towards light source.
+            Ray shadow_ray;
+            shadow_ray.p0 = intersection.point + kRayEpsilon * intersection.normal;   // TODO: offset from intersection point by epsilon along normal
+            shadow_ray.dir = light_pos-shadow_ray.p0;  // TODO: direction from shadow_ray.p0 to light_pos
+
+            // TODO(Task 4.1): visibility check using nearest hit.
+            Intersection shadow_hit;
+            bool is_visible = false;  // TODO: replace with intersect_nearest-based visibility logic
+            if (scene.intersect_nearest(shadow_ray, shadow_hit, dist + kRayEpsilon)) {
+                is_visible = true;
+                if(scene.intersect_nearest(shadow_ray, shadow_hit, dist - kRayEpsilon)) {
+                    is_visible = false;
+                }
+            }
+
+            // TODO(Task 4.1): area-light normal term and emitted radiance.
+            float c_y = max(dot(shadow_hit.normal,-1.0f*light_dir),0.0f);                // TODO: cosine term at light sample. this is lamberts cosine law
+            vec3 emitted_radiance = light_source->material->emission;     // TODO: derive from light_source->material->emission
+            vec3 rVector = shadow_hit.point - intersection.point;
+            float r = length(rVector);
+            vec3 direct_light = (emitted_radiance)*vec3((c_y/(r*r))*c_x);  //something to do with radius   // TODO: Lambert contribution (Eq. 3 style)
+
+            //specular calculation
+            vec3 viewDir = normalize(vec3(-1.0f * shadow_ray.dir));
+            vec3 h = normalize(viewDir + light_dir);
+            float scaleFactor = (shininess + 2.0f) / 2.0f * kPi;
+            float shiny = pow(max(0.0f, dot(shadow_hit.normal, h)), shininess);
+            vec3 direct_light_specular = vec3(scaleFactor * shiny);
+
+            if (is_visible)
+                summed_samples += (0.25f*direct_light+0.75f*direct_light_specular);   
+        }
+
+        float light_area = light_source->get_surface_area();
+        float normalization = (kDirectLightSamples > 0) ? (light_area / static_cast<float>(kDirectLightSamples)) : 0.0f;
+        vec3 light_contribution = summed_samples*normalization;  // TODO: combine sample sum and estimator scaling
+        (void)normalization;
+        (void)summed_samples;
+        cumulative_direct_light += light_contribution;
+    }
+
+    return cumulative_direct_light * albedo / kPi;
+}
+
+vec3 MatteGlossyMaterial::color_of_last_bounce(Ray& ray, Intersection& intersection, Scene const& scene) {
+    using namespace glm;
+    /**
+     * Color after last bounce will be `W_wip * last_bounce_color`.
+     * For this assignment scaffold, the intended final result uses direct diffuse lighting.
+     */
+
+    // TODO(Task 4.1): replace fallback with finished direct-light shading.
+    vec3 direct_light = this->get_direct_lighting(intersection, scene);
+    vec3 shaded = ray.W_wip * direct_light;
+    return shaded;  // TODO (Task 4.1): Return `shaded` once `get_direct_lighting` is implemented.
+
+    // Boilerplate fallback while Task 4.1 is incomplete. (Remove this normal shading once Task 4.1 is implemented)
+    //return 0.4f * normalize(intersection.normal) + vec3(0.6f);
+}

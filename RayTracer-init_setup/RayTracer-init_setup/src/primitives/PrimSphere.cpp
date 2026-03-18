@@ -40,14 +40,20 @@ bool PrimSphere::intersect(const Ray& ray, Intersection& out_hit) const {
     vec3 normal;
     if (discriminant == 0.0f) { //might need to use the kEpsilon to account for floating point error
         t = dot(-ray.dir, ray.p0 - center);
+        if (t < kEpsilon) {
+            return false;
+        }
         q = ray.p0 + t * ray.dir;
         normal = normalize(q - center);
         out_hit = { t, q, normal, const_cast<PrimSphere*>(this), nullptr };
     }
     if (discriminant > 0.0f) {
-        float positiveSqrtSolutionT = dot(-ray.dir, ray.p0 - center) + discriminant;
-        float negativeSqrtSolutionT = dot(-ray.dir, ray.p0 - center) - discriminant;
+        float positiveSqrtSolutionT = dot(-ray.dir, ray.p0 - center) + sqrt(discriminant);
+        float negativeSqrtSolutionT = dot(-ray.dir, ray.p0 - center) - sqrt(discriminant);
         t = min(positiveSqrtSolutionT, negativeSqrtSolutionT);
+        if (t < kEpsilon) {
+            return false;
+        }
         q = ray.p0 + t * ray.dir;
         normal = normalize(q - center);
         out_hit = { t, q, normal, const_cast<PrimSphere*>(this), nullptr };
