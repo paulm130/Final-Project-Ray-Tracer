@@ -69,6 +69,11 @@ Scene* bunny_box(bool mirror_sphere) {
     root_node->childnodes.push_back(std::move(square_light_3));
     root_node->childtransforms.push_back(translate(vec3(2.0f, 0.0f, 1.25f)));
 
+    std::unique_ptr<Node> square_light_4 = std::make_unique<Node>();
+    square_light_4->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(1.0f, 0.0f, 0.0f), light_material);
+    root_node->childnodes.push_back(std::move(square_light_4));
+    root_node->childtransforms.push_back(translate(vec3(-2.0f, 0.0f, 1.25f)));
+
     // Diffuse cuboid composed from six square faces in local model space.
     std::unique_ptr<Node> cuboid_node = std::make_unique<Node>();
 
@@ -117,7 +122,7 @@ Scene* bunny_box(bool mirror_sphere) {
     root_node->childtransforms.push_back(translate(vec3(1.0f, -1.40f, 0.55f)));
 
     std::unique_ptr<Node> bunny = std::make_unique<Node>();
-    bunny->model = std::make_unique<Obj>("src/models/bunny.obj", matte_glossy_material_bunny);
+    bunny->model = std::make_unique<Obj>("src/models/bunny_blender_decimate_modifier.obj", matte_glossy_material_bunny);
     root_node->childnodes.push_back(std::move(bunny));
     root_node->childtransforms.push_back(
         translate(vec3(-0.75f, -0.75f, 0.0f)) *
