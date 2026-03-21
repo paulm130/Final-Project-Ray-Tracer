@@ -16,13 +16,14 @@ using namespace glm;
 namespace {
 Scene* bunny_box(bool mirror_sphere) {
     // Materials
-    std::shared_ptr<MatteGlossyMaterial> diffuse_material_white_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.725f, 0.71f, 0.68f)));
-    std::shared_ptr<MatteGlossyMaterial> diffuse_material_red_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.63f, 0.065f, 0.05f)));
-    std::shared_ptr<MatteGlossyMaterial> diffuse_material_green_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.14f, 0.45f, 0.091f)));
-    std::shared_ptr<MatteGlossyMaterial> diffuse_material_cuboid = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.85f, 0.75f, 0.5f)));
-    std::shared_ptr<MatteGlossyMaterial> diffuse_material_sphere = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.85f, 0.75f, 0.5f)));
-    std::shared_ptr<MatteGlossyMaterial> mirror_material_sphere = std::make_shared<MatteGlossyMaterial>(vec3(0.95f));
-    std::shared_ptr<MatteGlossyMaterial> light_material = std::make_shared<MatteGlossyMaterial>(vec3(0.0f));
+    std::shared_ptr<MatteGlossyMaterial> diffuse_material_white_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.725f, 0.71f, 0.68f)),25.0f);
+    std::shared_ptr<MatteGlossyMaterial> diffuse_material_red_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.63f, 0.065f, 0.05f)),25.0f);
+    std::shared_ptr<MatteGlossyMaterial> diffuse_material_green_wall = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.14f, 0.45f, 0.091f)),25.0f);
+    std::shared_ptr<MatteGlossyMaterial> diffuse_material_cuboid = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.85f, 0.75f, 0.5f)),25.0f);
+    std::shared_ptr<MatteGlossyMaterial> diffuse_material_sphere = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.85f, 0.75f, 0.5f)),25.0f);
+    std::shared_ptr<MatteGlossyMaterial> matte_glossy_material_bunny = std::make_shared<MatteGlossyMaterial>(LinearToSRGB(vec3(0.85f, 0.75f, 0.5f)),125.0f);
+    std::shared_ptr<MatteGlossyMaterial> mirror_material_sphere = std::make_shared<MatteGlossyMaterial>(vec3(0.95f),100.0f);
+    std::shared_ptr<MatteGlossyMaterial> light_material = std::make_shared<MatteGlossyMaterial>(vec3(0.0f),25.0f);
     light_material->convert_to_light(vec3(1.0f), vec3(30.0f));  // color, total power
 
     // Create scene tree
@@ -56,46 +57,56 @@ Scene* bunny_box(bool mirror_sphere) {
     std::unique_ptr<Node> square_light = std::make_unique<Node>();
     square_light->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, -1.0f, 0.0f), light_material);
     root_node->childnodes.push_back(std::move(square_light));
+    root_node->childtransforms.push_back(translate(vec3(0.0f, 2.0f, 1.5f)));
+
+    std::unique_ptr<Node> square_light_2 = std::make_unique<Node>();
+    square_light_2->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, -1.0f, 0.0f), light_material);
+    root_node->childnodes.push_back(std::move(square_light_2));
     root_node->childtransforms.push_back(translate(vec3(0.0f, 2.0f, 0.0f)));
+
+    std::unique_ptr<Node> square_light_3 = std::make_unique<Node>();
+    square_light_3->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(-1.0f, 0.0f, 0.0f), light_material);
+    root_node->childnodes.push_back(std::move(square_light_3));
+    root_node->childtransforms.push_back(translate(vec3(2.0f, 0.0f, 1.25f)));
 
     // Diffuse cuboid composed from six square faces in local model space.
     std::unique_ptr<Node> cuboid_node = std::make_unique<Node>();
 
-    std::unique_ptr<Node> cuboid_pos_x_face = std::make_unique<Node>();
-    cuboid_pos_x_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(1.0f, 0.0f, 0.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_pos_x_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(0.5f, 0.0f, 0.0f)));
+    //std::unique_ptr<Node> cuboid_pos_x_face = std::make_unique<Node>();
+    //cuboid_pos_x_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(1.0f, 0.0f, 0.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_pos_x_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(0.5f, 0.0f, 0.0f)));
 
-    std::unique_ptr<Node> cuboid_neg_x_face = std::make_unique<Node>();
-    cuboid_neg_x_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(-1.0f, 0.0f, 0.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_neg_x_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(-0.5f, 0.0f, 0.0f)));
+    //std::unique_ptr<Node> cuboid_neg_x_face = std::make_unique<Node>();
+    //cuboid_neg_x_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(-1.0f, 0.0f, 0.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_neg_x_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(-0.5f, 0.0f, 0.0f)));
 
-    std::unique_ptr<Node> cuboid_pos_y_face = std::make_unique<Node>();
-    cuboid_pos_y_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 1.0f, 0.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_pos_y_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.5f, 0.0f)));
+    //std::unique_ptr<Node> cuboid_pos_y_face = std::make_unique<Node>();
+    //cuboid_pos_y_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 1.0f, 0.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_pos_y_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.5f, 0.0f)));
 
-    std::unique_ptr<Node> cuboid_neg_y_face = std::make_unique<Node>();
-    cuboid_neg_y_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, -1.0f, 0.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_neg_y_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(0.0f, -0.5f, 0.0f)));
+    //std::unique_ptr<Node> cuboid_neg_y_face = std::make_unique<Node>();
+    //cuboid_neg_y_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, -1.0f, 0.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_neg_y_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(0.0f, -0.5f, 0.0f)));
 
-    std::unique_ptr<Node> cuboid_pos_z_face = std::make_unique<Node>();
-    cuboid_pos_z_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 0.0f, 1.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_pos_z_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.0f, 0.5f)));
+    //std::unique_ptr<Node> cuboid_pos_z_face = std::make_unique<Node>();
+    //cuboid_pos_z_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 0.0f, 1.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_pos_z_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.0f, 0.5f)));
 
-    std::unique_ptr<Node> cuboid_neg_z_face = std::make_unique<Node>();
-    cuboid_neg_z_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 0.0f, -1.0f), diffuse_material_cuboid);
-    cuboid_node->childnodes.push_back(std::move(cuboid_neg_z_face));
-    cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.0f, -0.5f)));
+    //std::unique_ptr<Node> cuboid_neg_z_face = std::make_unique<Node>();
+    //cuboid_neg_z_face->model = std::make_unique<Square>(vec3(0.0f), 1.0f, vec3(0.0f, 0.0f, -1.0f), diffuse_material_cuboid);
+    //cuboid_node->childnodes.push_back(std::move(cuboid_neg_z_face));
+    //cuboid_node->childtransforms.push_back(translate(vec3(0.0f, 0.0f, -0.5f)));
 
-    root_node->childnodes.push_back(std::move(cuboid_node));
-    root_node->childtransforms.push_back(
-        translate(vec3(-0.65f, -1.0f, -0.45f)) *
-        rotate(degree_to_rad(18.0f), vec3(0.0f, 1.0f, 0.0f)) *
-        scale(vec3(1.0f, 2.0f, 1.0f)));
+    //root_node->childnodes.push_back(std::move(cuboid_node));
+    //root_node->childtransforms.push_back(
+        //translate(vec3(-0.65f, -1.0f, -0.45f)) *
+        //rotate(degree_to_rad(18.0f), vec3(0.0f, 1.0f, 0.0f)) *
+        //scale(vec3(1.0f, 2.0f, 1.0f)));
 
     std::shared_ptr<MaterialBase> sphere_material = mirror_sphere
                                                          ? std::static_pointer_cast<MaterialBase>(mirror_material_sphere)
@@ -103,7 +114,15 @@ Scene* bunny_box(bool mirror_sphere) {
     std::unique_ptr<Node> sphere_node = std::make_unique<Node>();
     sphere_node->model = std::make_unique<Sphere>(0.6f, vec3(0.0f), sphere_material);
     root_node->childnodes.push_back(std::move(sphere_node));
-    root_node->childtransforms.push_back(translate(vec3(0.75f, -1.40f, 0.55f)));
+    root_node->childtransforms.push_back(translate(vec3(1.0f, -1.40f, 0.55f)));
+
+    std::unique_ptr<Node> bunny = std::make_unique<Node>();
+    bunny->model = std::make_unique<Obj>("src/models/bunny.obj", matte_glossy_material_bunny);
+    root_node->childnodes.push_back(std::move(bunny));
+    root_node->childtransforms.push_back(
+        translate(vec3(-0.75f, -0.75f, 0.0f)) *
+        scale(vec3(1.25f)) *
+        rotate(degree_to_rad(30.0f), vec3(0.0f, 0.5f, 0.0f)));
 
     // Initialize the scene
     return new Scene(std::move(root_node));
