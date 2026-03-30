@@ -1,0 +1,4 @@
+{
+  "enableCMake": true,
+  "sourceDirectory": "raytracer-init_setup\\raytracer-init_setup"
+}

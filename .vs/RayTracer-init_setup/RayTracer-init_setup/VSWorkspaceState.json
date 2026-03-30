@@ -1,0 +1,8 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "RayTracer-init_setup\\RayTracer-init_setup\\out\\build\\x64-Debug",
+      "RayTracer-init_setup\\RayTracer-init_setup\\out\\install\\x64-Debug"
+    ]
+  }
+}
