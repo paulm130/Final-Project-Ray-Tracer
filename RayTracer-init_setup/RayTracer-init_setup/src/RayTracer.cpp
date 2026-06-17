@@ -99,7 +99,7 @@ void RayTracer::init(int scene_id) {
     else if (scene_id == 5)
         scene = std::unique_ptr<Scene>(bunny_box(true));
     else {
-        std::cout << "Invalid <scene_id> " << scene_id << " given (expected 1..4)" << std::endl;
+        std::cout << "Invalid <scene_id> " << scene_id << " given (expected 1..5)" << std::endl;
         exit(1);
     }
 }
